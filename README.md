@@ -17,27 +17,27 @@ Reulst
 ---------------------------------
 benchmark:create
                                user     system      total        real
-acts-as-taggable-on      479.195967  17.116110 496.312077 (680.653376)
-acts-as-taggable-array-on 13.505276   0.759835  14.265111 ( 20.146004)
+acts-as-taggable-on       36.377959   1.630785  38.008744 ( 55.704902)
+acts-as-taggable-array-on  1.491484   0.084560   1.576044 (  2.432864)
 ---------------------------------
 benchmark:list
                                user     system      total        real
-acts-as-taggable-on       15.736787   0.451188  16.187975 ( 25.836636)
-acts-as-taggable-array-on  0.394650   0.006578   0.401228 (  0.459344)
+acts-as-taggable-on        1.054643   0.040069   1.094712 (  1.711029)
+acts-as-taggable-array-on  0.038070   0.001136   0.039206 (  0.048498)
 ---------------------------------
 benchmark:ownership
                                user     system      total        real
-acts-as-taggable-on        0.165684   0.010729   0.176413 (  0.398549)
-acts-as-taggable-array-on  0.151592   0.012290   0.163882 (  0.268699)
+acts-as-taggable-on        0.007535   0.000501   0.008036 (  0.063663)
+acts-as-taggable-array-on  0.004541   0.000784   0.005325 (  0.015362)
 ---------------------------------
 benchmark:find_by_tag
                                user     system      total        real
-acts-as-taggable-on        1.560049   0.120401   1.680450 (  3.492485)
-acts-as-taggable-array-on  0.114764   0.012967   0.127731 (  0.565179)
+acts-as-taggable-on        0.060807   0.003917   0.064724 (  0.176698)
+acts-as-taggable-array-on  0.004174   0.000279   0.004453 (  0.012251)
 ---------------------------------
 benchmark:count
                                user     system      total        real
-acts-as-taggable-on        0.466517   0.008712   0.475229 (  0.699593)
-acts-as-taggable-array-on  0.164903   0.008948   0.173851 (  0.281838)
+acts-as-taggable-on        0.045350   0.001312   0.046662 (  0.080520)
+acts-as-taggable-array-on  0.010802   0.000532   0.011334 (  0.019221)
 ---------------------------------
 ```
