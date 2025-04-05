@@ -11,6 +11,14 @@ tags = []
 total_tags.times { |i| tags << "tag#{i}" }
 tags += tags.first(total_tags_per_post)
 
+def create_tags(i, count)
+  tags = []
+  count.times do |j|
+    tags << "tag#{i + j}"
+  end
+  tags
+end
+
 namespace :benchmark do
   task create: :environment do
     [ User, Post, TagArrayPost, PgPost, ActsAsTaggableOn::Tagging, ActsAsTaggableOn::Tag ].each do |model|
@@ -48,7 +56,7 @@ namespace :benchmark do
     end
   end
 
-  task list: :environment do
+  task as_json: :environment do
     Benchmark.bm do |x|
       x.report("acts-as-taggable-on") do
         total_users.times do |i|
@@ -72,7 +80,7 @@ namespace :benchmark do
     end
   end
 
-  task ownership: :environment do
+  task owned_tags: :environment do
     Benchmark.bm do |x|
       x.report("acts-as-taggable-on") do
         total_users.times do |i|
@@ -87,26 +95,6 @@ namespace :benchmark do
       x.report("pg_taggable") do
         total_users.times do |i|
           PgPost.where(user_id: i + 1).uniq_tags
-        end
-      end
-    end
-  end
-
-  task find_by_tag: :environment do
-    Benchmark.bm do |x|
-      x.report("acts-as-taggable-on") do
-        total_tags.times do |i|
-          Post.tagged_with([ "tag#{i}" ], on: :tags).ids
-        end
-      end
-      x.report("acts-as-taggable-array-on") do
-        total_tags.times do |i|
-          TagArrayPost.with_any_tags([ "tag#{i}" ]).ids
-        end
-      end
-      x.report("pg_taggable") do
-        total_tags.times do |i|
-          PgPost.where(any_tags: [ "tag#{i}" ]).ids
         end
       end
     end
@@ -132,13 +120,108 @@ namespace :benchmark do
     end
   end
 
+  task :all_tags, [ :tag_count ] => :environment do |task, args|
+    count = args.tag_count.to_i
+    Benchmark.bm do |x|
+      x.report("acts-as-taggable-on") do
+        total_tags.times do |i|
+          Post.tagged_with(create_tags(i, count), on: :tags).ids
+        end
+      end
+      x.report("acts-as-taggable-array-on") do
+        total_tags.times do |i|
+          TagArrayPost.with_all_tags(create_tags(i, count)).ids
+        end
+      end
+      x.report("pg_taggable") do
+        total_tags.times do |i|
+          PgPost.where(all_tags: create_tags(i, count)).ids
+        end
+      end
+    end
+  end
+
+  task :any_tags, [ :tag_count ] => :environment do |task, args|
+    count = args.tag_count.to_i
+    Benchmark.bm do |x|
+      x.report("acts-as-taggable-on") do
+        total_tags.times do |i|
+          Post.tagged_with(create_tags(i, count), on: :tags, any: true).ids
+        end
+      end
+      x.report("acts-as-taggable-array-on") do
+        total_tags.times do |i|
+          TagArrayPost.with_any_tags(create_tags(i, count)).ids
+        end
+      end
+      x.report("pg_taggable") do
+        total_tags.times do |i|
+          PgPost.where(any_tags: create_tags(i, count)).ids
+        end
+      end
+    end
+  end
+
+  task :exclude_tags, [ :tag_count ] => :environment do |task, args|
+    count = args.tag_count.to_i
+    Benchmark.bm do |x|
+      x.report("acts-as-taggable-on") do
+        total_tags.times do |i|
+          Post.tagged_with(create_tags(i, count), on: :tags, exclude: true).ids
+        end
+      end
+      x.report("acts-as-taggable-array-on") do
+        total_tags.times do |i|
+          TagArrayPost.without_any_tags(create_tags(i, count)).ids
+        end
+      end
+      x.report("pg_taggable") do
+        total_tags.times do |i|
+          PgPost.where.not(any_tags: create_tags(i, count)).ids
+        end
+      end
+    end
+  end
+
+  task :match_all_tags, [ :tag_count ] => :environment do |task, args|
+    count = args.tag_count.to_i
+    Benchmark.bm do |x|
+      x.report("acts-as-taggable-on") do
+        total_tags.times do |i|
+          Post.tagged_with(create_tags(i, count), on: :tags, match_all: true).ids
+        end
+      end
+      x.report("pg_taggable") do
+        total_tags.times do |i|
+          PgPost.where(tags_eq: create_tags(i, count)).ids
+        end
+      end
+    end
+  end
+
   task all: :environment do
     puts "---------------------------------"
-    %w[create list ownership find_by_tag count].each do |sub_task|
+    %w[create as_json owned_tags count].each do |sub_task|
       task = "benchmark:#{sub_task}"
       puts task
       Rake::Task[task].invoke
       puts "---------------------------------"
     end
+
+    %w[all_tags any_tags exclude_tags].each do |sub_task|
+      5.times do |i|
+        task = "benchmark:#{sub_task}"
+        puts "#{task}[#{i + 1}]"
+        Rake::Task[task].invoke(i + 1)
+        Rake::Task[task].reenable
+        puts "---------------------------------"
+      end
+    end
+
+    task = "benchmark:match_all_tags"
+    puts "#{task}[10]"
+    Rake::Task[task].invoke(10)
+    Rake::Task[task].reenable
+    puts "---------------------------------"
   end
 end
