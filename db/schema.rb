@@ -10,9 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_03_25_005533) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_05_012024) do
   # These are extensions that must be enabled in order to support this database
+  enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "pg_posts", force: :cascade do |t|
+    t.string "title"
+    t.bigint "user_id"
+    t.string "tags", default: [], array: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tags"], name: "index_pg_posts_on_tags", using: :gin
+    t.index ["user_id"], name: "index_pg_posts_on_user_id"
+  end
 
   create_table "posts", force: :cascade do |t|
     t.string "title"

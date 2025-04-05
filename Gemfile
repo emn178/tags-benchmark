@@ -58,3 +58,4 @@ end
 
 gem "acts-as-taggable-on"
 gem "acts-as-taggable-array-on"
+gem "pg_taggable"

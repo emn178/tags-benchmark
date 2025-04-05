@@ -17,27 +17,32 @@ Reulst
 ---------------------------------
 benchmark:create
                                user     system      total        real
-acts-as-taggable-on       36.377959   1.630785  38.008744 ( 55.704902)
-acts-as-taggable-array-on  1.491484   0.084560   1.576044 (  2.432864)
+acts-as-taggable-on       33.000478   1.194249  34.194727 ( 46.103180)
+acts-as-taggable-array-on  1.459505   0.085844   1.545349 (  2.164117)
+pg_taggable                1.559289   0.089297   1.648586 (  2.242263)
 ---------------------------------
 benchmark:list
                                user     system      total        real
-acts-as-taggable-on        1.054643   0.040069   1.094712 (  1.711029)
-acts-as-taggable-array-on  0.038070   0.001136   0.039206 (  0.048498)
+acts-as-taggable-on        1.080749   0.036074   1.116823 (  1.780711)
+acts-as-taggable-array-on  0.032466   0.000602   0.033068 (  0.038429)
+pg_taggable                0.028307   0.000629   0.028936 (  0.034358)
 ---------------------------------
 benchmark:ownership
                                user     system      total        real
-acts-as-taggable-on        0.007535   0.000501   0.008036 (  0.063663)
-acts-as-taggable-array-on  0.004541   0.000784   0.005325 (  0.015362)
+acts-as-taggable-on        0.007209   0.000591   0.007800 (  0.032829)
+acts-as-taggable-array-on  0.004210   0.000712   0.004922 (  0.014295)
+pg_taggable                0.003516   0.000328   0.003844 (  0.010513)
 ---------------------------------
 benchmark:find_by_tag
                                user     system      total        real
-acts-as-taggable-on        0.060807   0.003917   0.064724 (  0.176698)
-acts-as-taggable-array-on  0.004174   0.000279   0.004453 (  0.012251)
+acts-as-taggable-on        0.047971   0.003356   0.051327 (  0.167504)
+acts-as-taggable-array-on  0.036378   0.005092   0.041470 (  0.175794)
+pg_taggable                0.041960   0.004089   0.046049 (  0.157058)
 ---------------------------------
 benchmark:count
                                user     system      total        real
-acts-as-taggable-on        0.045350   0.001312   0.046662 (  0.080520)
-acts-as-taggable-array-on  0.010802   0.000532   0.011334 (  0.019221)
+acts-as-taggable-on        0.041828   0.000888   0.042716 (  0.100854)
+acts-as-taggable-array-on  0.008292   0.000557   0.008849 (  0.016802)
+pg_taggable                0.007974   0.000391   0.008365 (  0.017809)
 ---------------------------------
 ```

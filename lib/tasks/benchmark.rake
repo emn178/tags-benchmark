@@ -13,7 +13,7 @@ tags += tags.first(total_tags_per_post)
 
 namespace :benchmark do
   task create: :environment do
-    [ User, Post, TagArrayPost, ActsAsTaggableOn::Tagging, ActsAsTaggableOn::Tag ].each do |model|
+    [ User, Post, TagArrayPost, PgPost, ActsAsTaggableOn::Tagging, ActsAsTaggableOn::Tag ].each do |model|
       ActiveRecord::Base.connection.execute("TRUNCATE TABLE #{model.table_name} RESTART IDENTITY CASCADE;")
     end
 
@@ -38,6 +38,13 @@ namespace :benchmark do
           TagArrayPost.create(title: "p#{i}", user_id: user_id, tags: tags[tag_index...(tag_index + total_tags_per_post)])
         end
       end
+      x.report("pg_taggable") do
+        total_posts.times do |i|
+          user_id = i / total_posts_per_user + 1
+          tag_index = i % total_tags
+          PgPost.create(title: "p#{i}", user_id: user_id, tags: tags[tag_index...(tag_index + total_tags_per_post)])
+        end
+      end
     end
   end
 
@@ -57,6 +64,11 @@ namespace :benchmark do
           TagArrayPost.where(user_id: i + 1).as_json(only: %i[id title tags])
         end
       end
+      x.report("pg_taggable") do
+        total_users.times do |i|
+          PgPost.where(user_id: i + 1).as_json(only: %i[id title tags])
+        end
+      end
     end
   end
 
@@ -72,6 +84,11 @@ namespace :benchmark do
           TagArrayPost.all_tags { where(user_id: i + 1) }
         end
       end
+      x.report("pg_taggable") do
+        total_users.times do |i|
+          PgPost.where(user_id: i + 1).uniq_tags
+        end
+      end
     end
   end
 
@@ -83,8 +100,13 @@ namespace :benchmark do
         end
       end
       x.report("acts-as-taggable-array-on") do
-        total_users.times do |i|
+        total_tags.times do |i|
           TagArrayPost.with_any_tags([ "tag#{i}" ]).ids
+        end
+      end
+      x.report("pg_taggable") do
+        total_tags.times do |i|
+          PgPost.where(any_tags: [ "tag#{i}" ]).ids
         end
       end
     end
@@ -100,6 +122,11 @@ namespace :benchmark do
       x.report("acts-as-taggable-array-on") do
         total_users.times do |i|
           TagArrayPost.tags_cloud { where(user_id: i + 1) }
+        end
+      end
+      x.report("pg_taggable") do
+        total_users.times do |i|
+          PgPost.where(user_id: i + 1).count_tags
         end
       end
     end
