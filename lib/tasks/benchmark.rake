@@ -208,20 +208,14 @@ namespace :benchmark do
       puts "---------------------------------"
     end
 
-    %w[all_tags any_tags exclude_tags].each do |sub_task|
-      5.times do |i|
+    %w[all_tags any_tags exclude_tags match_all_tags].each do |sub_task|
+      [ 1, 5, 10 ].each do |i|
         task = "benchmark:#{sub_task}"
-        puts "#{task}[#{i + 1}]"
-        Rake::Task[task].invoke(i + 1)
+        puts "#{task}[#{i}]"
+        Rake::Task[task].invoke(i)
         Rake::Task[task].reenable
         puts "---------------------------------"
       end
     end
-
-    task = "benchmark:match_all_tags"
-    puts "#{task}[10]"
-    Rake::Task[task].invoke(10)
-    Rake::Task[task].reenable
-    puts "---------------------------------"
   end
 end
