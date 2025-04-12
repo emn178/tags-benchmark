@@ -59,22 +59,28 @@ namespace :benchmark do
   task as_json: :environment do
     Benchmark.bm do |x|
       x.report("acts-as-taggable-on") do
-        total_users.times do |i|
-          Post.where(user_id: i + 1).includes(taggings: :tag)
-            .as_json(
-              only: %i[id title],
-              methods: %i[all_tags_list]
-            )
+        10.times do
+          total_users.times do |i|
+            Post.where(user_id: i + 1).includes(taggings: :tag)
+              .as_json(
+                only: %i[id title],
+                methods: %i[all_tags_list]
+              )
+          end
         end
       end
       x.report("acts-as-taggable-array-on") do
-        total_users.times do |i|
-          TagArrayPost.where(user_id: i + 1).as_json(only: %i[id title tags])
+        10.times do
+          total_users.times do |i|
+            TagArrayPost.where(user_id: i + 1).as_json(only: %i[id title tags])
+          end
         end
       end
       x.report("pg_taggable") do
-        total_users.times do |i|
-          PgPost.where(user_id: i + 1).as_json(only: %i[id title tags])
+        10.times do
+          total_users.times do |i|
+            PgPost.where(user_id: i + 1).as_json(only: %i[id title tags])
+          end
         end
       end
     end
@@ -83,18 +89,24 @@ namespace :benchmark do
   task owned_tags: :environment do
     Benchmark.bm do |x|
       x.report("acts-as-taggable-on") do
-        total_users.times do |i|
-          User.find(i + 1).owned_tags.select(:name).pluck(:name)
+        10.times do
+          total_users.times do |i|
+            User.find(i + 1).owned_tags.select(:name).pluck(:name)
+          end
         end
       end
       x.report("acts-as-taggable-array-on") do
-        total_users.times do |i|
-          TagArrayPost.all_tags { where(user_id: i + 1) }
+        10.times do
+          total_users.times do |i|
+            TagArrayPost.all_tags { where(user_id: i + 1) }
+          end
         end
       end
       x.report("pg_taggable") do
-        total_users.times do |i|
-          PgPost.where(user_id: i + 1).uniq_tags
+        10.times do
+          total_users.times do |i|
+            PgPost.where(user_id: i + 1).uniq_tags
+          end
         end
       end
     end
@@ -103,18 +115,24 @@ namespace :benchmark do
   task count: :environment do
     Benchmark.bm do |x|
       x.report("acts-as-taggable-on") do
-        total_users.times do |i|
-          Post.where(user_id: i + 1).tag_counts_on(:tags).map { |r| [ r.name, r.count ] }.to_h
+        10.times do
+          total_users.times do |i|
+            Post.where(user_id: i + 1).tag_counts_on(:tags).map { |r| [ r.name, r.count ] }.to_h
+          end
         end
       end
       x.report("acts-as-taggable-array-on") do
-        total_users.times do |i|
-          TagArrayPost.tags_cloud { where(user_id: i + 1) }
+        10.times do
+          total_users.times do |i|
+            TagArrayPost.tags_cloud { where(user_id: i + 1) }
+          end
         end
       end
       x.report("pg_taggable") do
-        total_users.times do |i|
-          PgPost.where(user_id: i + 1).count_tags
+        10.times do
+          total_users.times do |i|
+            PgPost.where(user_id: i + 1).count_tags
+          end
         end
       end
     end
@@ -199,9 +217,31 @@ namespace :benchmark do
     end
   end
 
+  task like: :environment do |task, args|
+    Benchmark.bm do |x|
+      x.report("acts-as-taggable-on") do
+        100.times do |i|
+          Post.tagged_with([ "tag#{i % 10}%" ], on: :tags, any: true, wild: :suffix).ids
+        end
+      end
+      x.report("acts-as-taggable-array-on") do
+        100.times do |i|
+          tags = TagArrayPost.all_tags.select { |t| t.start_with?("tag#{i % 10}") }
+          TagArrayPost.with_any_tags(tags).ids
+        end
+      end
+      x.report("pg_taggable") do
+        100.times do |i|
+          tags = PgPost.tags.where("tag LIKE ?", "tag#{i % 10}%").distinct.pluck(:tag)
+          PgPost.where(any_tags: tags).ids
+        end
+      end
+    end
+  end
+
   task all: :environment do
     puts "---------------------------------"
-    %w[create as_json owned_tags count].each do |sub_task|
+    %w[create as_json owned_tags count like].each do |sub_task|
       task = "benchmark:#{sub_task}"
       puts task
       Rake::Task[task].invoke
