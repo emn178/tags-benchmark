@@ -1,4 +1,4 @@
-require "benchmark"
+require "benchmark/ips"
 
 total_posts = 1000
 total_tags = 100
@@ -30,7 +30,8 @@ namespace :benchmark do
       users << User.create(name: "u#{i}")
     end
 
-    Benchmark.bm do |x|
+    Benchmark.ips do |x|
+      x.config(warmup: 0)
       x.report("acts-as-taggable-on") do
         total_posts.times do |i|
           user = users[i / total_posts_per_user]
@@ -57,7 +58,7 @@ namespace :benchmark do
   end
 
   task as_json: :environment do
-    Benchmark.bm do |x|
+    Benchmark.ips do |x|
       x.report("acts-as-taggable-on") do
         10.times do
           total_users.times do |i|
@@ -87,7 +88,7 @@ namespace :benchmark do
   end
 
   task owned_tags: :environment do
-    Benchmark.bm do |x|
+    Benchmark.ips do |x|
       x.report("acts-as-taggable-on") do
         10.times do
           total_users.times do |i|
@@ -113,7 +114,7 @@ namespace :benchmark do
   end
 
   task count: :environment do
-    Benchmark.bm do |x|
+    Benchmark.ips do |x|
       x.report("acts-as-taggable-on") do
         10.times do
           total_users.times do |i|
@@ -140,7 +141,7 @@ namespace :benchmark do
 
   task :all_tags, [ :tag_count ] => :environment do |task, args|
     count = args.tag_count.to_i
-    Benchmark.bm do |x|
+    Benchmark.ips do |x|
       x.report("acts-as-taggable-on") do
         total_tags.times do |i|
           Post.tagged_with(create_tags(i, count), on: :tags).ids
@@ -161,7 +162,7 @@ namespace :benchmark do
 
   task :any_tags, [ :tag_count ] => :environment do |task, args|
     count = args.tag_count.to_i
-    Benchmark.bm do |x|
+    Benchmark.ips do |x|
       x.report("acts-as-taggable-on") do
         total_tags.times do |i|
           Post.tagged_with(create_tags(i, count), on: :tags, any: true).ids
@@ -182,7 +183,7 @@ namespace :benchmark do
 
   task :exclude_tags, [ :tag_count ] => :environment do |task, args|
     count = args.tag_count.to_i
-    Benchmark.bm do |x|
+    Benchmark.ips do |x|
       x.report("acts-as-taggable-on") do
         total_tags.times do |i|
           Post.tagged_with(create_tags(i, count), on: :tags, exclude: true).ids
@@ -203,7 +204,7 @@ namespace :benchmark do
 
   task :match_all_tags, [ :tag_count ] => :environment do |task, args|
     count = args.tag_count.to_i
-    Benchmark.bm do |x|
+    Benchmark.ips do |x|
       x.report("acts-as-taggable-on") do
         total_tags.times do |i|
           Post.tagged_with(create_tags(i, count), on: :tags, match_all: true).ids
@@ -218,7 +219,7 @@ namespace :benchmark do
   end
 
   task like: :environment do |task, args|
-    Benchmark.bm do |x|
+    Benchmark.ips do |x|
       x.report("acts-as-taggable-on") do
         100.times do |i|
           Post.tagged_with([ "tag#{i % 10}%" ], on: :tags, any: true, wild: :suffix).ids
